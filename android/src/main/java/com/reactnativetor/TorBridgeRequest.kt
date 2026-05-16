@@ -13,7 +13,7 @@ class TaskParam(
   val method: String,
   val url: String,
   val json: String?,
-  val headers: HashMap<String, Any>?
+  val headers: HashMap<String, Any?>?
 );
 
 
@@ -71,7 +71,7 @@ class TorBridgeRequest constructor(
     }
 
     if (!param.headers.isNullOrEmpty()) {
-      param.headers.forEach { (key, value) -> request.addHeader(key, value.toString()); }
+      param.headers.forEach { (key, value) -> request.addHeader(key, value?.toString() ?: ""); }
     }
 
 
