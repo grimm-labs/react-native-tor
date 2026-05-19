@@ -4,20 +4,22 @@ import TorBridge from 'react-native-tor';
 
 type Await<T> = T extends PromiseLike<infer U> ? U : T;
 const client = TorBridge();
-let tcpStream: Await<ReturnType<typeof client['createTcpConnection']>> | null =
-  null;
+let tcpStream: Await<
+  ReturnType<(typeof client)['createTcpConnection']>
+> | null = null;
 
 export default function App() {
   const [socksPort, setSocksPort] = React.useState<number | undefined>();
   const [trustSSL, setTrustSSL] = React.useState<boolean>(true);
   const [onion, setOnion] = React.useState<string | undefined>(
-    'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/',
+    'https://duckduckgogg42xjoc72x3sjasowoarfbgcmvfimaftt6twagswzczad.onion/'
   );
   const [hasStream, setHasStream] = React.useState(false);
   const [streamConnectionTimeoutMS, setStreamConnectionTimeoutMS] =
     React.useState(15000);
   React.useEffect(() => {
     _init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const _init = async () => {
@@ -56,7 +58,9 @@ export default function App() {
   };
   const getOnion = async () => {
     try {
-      if (!onion) throw 'No onion detected';
+      if (!onion) {
+        throw 'No onion detected';
+      }
       let resp = await client.get(onion, undefined, trustSSL);
       console.log('got resp', resp);
     } catch (err) {
@@ -65,7 +69,9 @@ export default function App() {
   };
   const postOnion = async () => {
     try {
-      if (!onion) throw 'No onion detected';
+      if (!onion) {
+        throw 'No onion detected';
+      }
       let resp = await client.post(
         onion,
         JSON.stringify({q: 'hello'}),
@@ -74,7 +80,7 @@ export default function App() {
           // also supports
           // 'Content-Type': 'application/x-www-form-urlencoded',
         },
-        trustSSL,
+        trustSSL
       );
       console.log('got resp', resp);
     } catch (err) {
@@ -91,8 +97,11 @@ export default function App() {
   };
   const sendTcpMsg = async () => {
     try {
-      let msg = `{ "id": 1, "method": "blockchain.scripthash.get_balance", "params": ["716decbe1660861c3d93906cb1d98ee68b154fd4d23aed9783859c1271b52a9c"] }\n`;
-      if (!tcpStream) throw 'Stream not set';
+      let msg =
+        '{ "id": 1, "method": "blockchain.scripthash.get_balance", "params": ["716decbe1660861c3d93906cb1d98ee68b154fd4d23aed9783859c1271b52a9c"] }\n';
+      if (!tcpStream) {
+        throw 'Stream not set';
+      }
       await tcpStream.write(msg);
     } catch (err) {
       console.error('Error SendingTcpMSg', err);
@@ -107,7 +116,7 @@ export default function App() {
         {target, connectionTimeout: streamConnectionTimeoutMS},
         (data, err) => {
           console.log('tcp got msg', data, err);
-        },
+        }
       );
       console.log('after');
       tcpStream = conn;
@@ -118,7 +127,9 @@ export default function App() {
   };
   const closeTcpStream = async () => {
     try {
-      if (!tcpStream) throw 'Stream not set';
+      if (!tcpStream) {
+        throw 'Stream not set';
+      }
       await tcpStream.close();
       tcpStream = null;
       setHasStream(false);
@@ -142,7 +153,7 @@ export default function App() {
         {!!socksPort && (
           <View>
             <TextInput
-              style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+              style={styles.input}
               onChangeText={setOnion}
               value={onion}
             />
@@ -150,7 +161,7 @@ export default function App() {
             <Button onPress={postOnion} title="POST onion" />
             <Button onPress={startTcpStream} title="Start Tcp Stream" />
             <TextInput
-              style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+              style={styles.input}
               onChangeText={x => setStreamConnectionTimeoutMS(Number(x))}
               value={String(streamConnectionTimeoutMS)}
             />
@@ -182,5 +193,10 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
   },
 });
